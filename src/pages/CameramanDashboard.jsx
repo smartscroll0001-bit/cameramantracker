@@ -80,7 +80,7 @@ export function CameramanDashboard() {
         const day = String(today.getDate()).padStart(2, '0');
         const todayStr = `${year}-${month}-${day}`;
 
-        const [tasksResult, hoursResult, typesResult, usersResult, queriesResult] = await Promise.all([
+        const [tasksResult, hoursResult, typesResult, usersResult, queriesResult, pendingQueriesResult] = await Promise.all([
             getUserTasks(user.id, todayStr),
             getTodayHours(user.id, todayStr),
             getTaskTypes(),
@@ -109,7 +109,6 @@ export function CameramanDashboard() {
             // API returns 'trainers' array
             setAllUsers((usersResult.trainers || []).filter(u => u.id !== user.id)); // Exclude self
         }
-        const pendingQueriesResult = results[5]; // The new result from getPendingQueries
 
         let allQueries = [];
         if (queriesResult.success) {
