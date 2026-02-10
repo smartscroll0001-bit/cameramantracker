@@ -5,7 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { getTeamPerformance, getExportData } from '../lib/api';
 import { exportData } from '../lib/exportUtils.js';
 
-import { Users, TrendingUp, Clock, Download, X, Calendar, FileSpreadsheet, FileText, RefreshCw } from 'lucide-react';
+import { Users, TrendingUp, Clock, Download, X, Calendar, FileSpreadsheet, FileText, RefreshCw, MessageSquare, Send } from 'lucide-react';
 import './AdminDashboard.css';
 
 export function AdminDashboard() {
