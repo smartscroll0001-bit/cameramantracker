@@ -1,20 +1,32 @@
 import { executeQuery } from './_utils/db.js';
 import { logAction } from './_utils/audit.js';
+import { requireAuth } from './_utils/auth_middleware.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
-    const { action, ...data } = req.body;
+
+
+    // AUTH CHECK
+    const user = requireAuth(req, res);
+    if (!user) return;
 
     try {
         if (action === 'get') {
             const result = await executeQuery('SELECT * FROM task_types ORDER BY name');
             return res.status(200).json({ success: true, types: result.rows });
+        }
 
-        } else if (action === 'add') {
-            const { name, userId } = data;
+        // All other actions require admin
+        if (user.role !== 'admin') {
+            return res.status(403).json({ success: false, error: 'Unauthorized: Admin access required' });
+        }
+
+        if (action === 'add') {
+            const { name } = data;
+            const userId = user.userId;
 
             try {
                 await executeQuery('INSERT INTO task_types (name) VALUES (?)', [name]);
@@ -28,7 +40,8 @@ export default async function handler(req, res) {
             }
 
         } else if (action === 'update') {
-            const { id, name, userId } = data;
+            const { id, name } = data;
+            const userId = user.userId;
 
             try {
                 await executeQuery('UPDATE task_types SET name = ? WHERE id = ?', [name, id]);
@@ -42,7 +55,8 @@ export default async function handler(req, res) {
             }
 
         } else if (action === 'delete') {
-            const { id, userId } = data;
+            const { id } = data;
+            const userId = user.userId;
             await executeQuery('DELETE FROM task_types WHERE id = ?', [id]);
             if (userId) await logAction(userId, 'DELETE_TASK_TYPE', { id }, req);
             return res.status(200).json({ success: true });

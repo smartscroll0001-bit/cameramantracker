@@ -1,4 +1,5 @@
 import { executeQuery, executeBatch } from './_utils/db.js';
+import { requireAuth } from './_utils/auth_middleware.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -7,9 +8,12 @@ export default async function handler(req, res) {
 
     const { action, ...data } = req.body;
 
+    const user = requireAuth(req, res);
+    if (!user) return;
+
     try {
         if (action === 'get') {
-            const { userId } = data;
+            const userId = user.userId; // Use authenticated ID
             let query;
             let params = [];
 
@@ -31,6 +35,9 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true, announcements: result.rows });
 
         } else if (action === 'create') {
+            if (user.role !== 'admin') {
+                return res.status(403).json({ success: false, error: 'Unauthorized: Only admins can create announcements' });
+            }
             const { message, isUrgent, recipientIds } = data;
             const isGlobal = recipientIds.length === 0 || recipientIds.includes('all');
 

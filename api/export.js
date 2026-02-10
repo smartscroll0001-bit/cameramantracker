@@ -1,4 +1,5 @@
 import { executeQuery } from './_utils/db.js';
+import { requireAuth } from './_utils/auth_middleware.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -6,6 +7,15 @@ export default async function handler(req, res) {
     }
 
     const { startDate, endDate } = req.body;
+
+    // AUTH CHECK: Verify token and Admin Role
+    const user = requireAuth(req, res);
+    if (!user) return;
+
+    // Only admins can export all data
+    if (user.role !== 'admin') {
+        return res.status(403).json({ success: false, error: 'Unauthorized: Admin access required' });
+    }
 
     try {
         const query = `

@@ -1,4 +1,5 @@
 import { executeQuery } from './_utils/db.js';
+import { requireAuth } from './_utils/auth_middleware.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -7,9 +8,19 @@ export default async function handler(req, res) {
 
     const { action, ...data } = req.body;
 
+    // AUTH CHECKs
+    const user = requireAuth(req, res);
+    if (!user) return;
+
     try {
         if (action === 'trainer-tasks') {
             const { trainerId, dateRange = 'week', startDate, endDate } = data;
+
+            // SECURITY: Non-admins can only view their own tasks
+            if (user.role !== 'admin' && user.userId !== parseInt(trainerId)) {
+                return res.status(403).json({ success: false, error: 'Unauthorized: Cannot view other users reports' });
+            }
+
             const today = new Date();
             let query = `
                 SELECT 
