@@ -24,7 +24,7 @@ export default async function handler(req, res) {
             let query = `
                 SELECT 
                     t.id, t.user_id as owner_id, t.task_type, t.custom_task_name, 
-                    t.date, t.start_time, t.end_time, t.remarks, t.admin_query, t.query_status,
+                    t.date, t.start_time, t.end_time, t.remarks, t.admin_query, t.query_status, t.created_at,
                     tc.hours, tc.collaborator_type
                 FROM tasks t
                 JOIN task_collaborators tc ON t.id = tc.task_id

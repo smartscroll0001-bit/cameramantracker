@@ -537,7 +537,7 @@ export function CameramanDashboard() {
                                         <div className="activity-time">
                                             {task.start_time && task.end_time
                                                 ? `${task.start_time} - ${task.end_time}`
-                                                : new Date(task.created_at).toLocaleTimeString()}
+                                                : (task.created_at ? new Date(task.created_at).toLocaleTimeString() : '')}
                                         </div>
                                     </div>
                                     <div className="activity-badge-yellow">
