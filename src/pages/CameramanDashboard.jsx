@@ -89,7 +89,11 @@ export function CameramanDashboard() {
         ]);
 
         if (typesResult.success && typesResult.types.length > 0) {
-            setTaskTypes(typesResult.types.map(t => t.name));
+            // Ensure system types like Leave and Half Day are always available
+            const apiTypes = typesResult.types.map(t => t.name);
+            const systemTypes = ['Leave', 'Half Day', 'Holiday'];
+            // Combine and deduplicate
+            setTaskTypes([...new Set([...apiTypes, ...systemTypes])]);
         } else if (taskTypes.length === 0) {
             setTaskTypes(FALLBACK_TASK_TYPES);
         }
@@ -127,8 +131,22 @@ export function CameramanDashboard() {
         e.preventDefault();
         setLoading(true);
 
+        // Validation: Cannot add Leave/Holiday if other tasks exist
+        const isLeaveOrHoliday = ['Leave', 'Holiday'].includes(formData.taskType);
+        // Check if there are any existing tasks (excluding the one properly being edited, if any)
+        const otherTasksExist = tasks.some(t => !editingTask || t.id !== editingTask.id);
+
+        if (isLeaveOrHoliday && otherTasksExist) {
+            alert("You cannot mark 'Leave' or 'Holiday' if you have already logged tasks for today. Please delete existing tasks first.");
+            setLoading(false);
+            return;
+        }
+
         // Process collaborators
-        const finalCollaborators = collaborators.map(c => ({
+        // If task type is Leave/Half Day/Holiday, force collaborators to be empty
+        const isPersonalTask = ['Leave', 'Half Day', 'Holiday'].includes(formData.taskType);
+
+        const finalCollaborators = isPersonalTask ? [] : collaborators.map(c => ({
             userId: c.userId,
             hours: c.isFullHours ? formData.hours : c.hours
         }));
@@ -402,8 +420,8 @@ export function CameramanDashboard() {
                                     />
                                 </div>
 
-                                {/* Collaborators Section */}
-                                {!editingTask && (
+                                {/* Collaborators Section - Hidden for Leave/Half Day */}
+                                {!editingTask && !['Leave', 'Holiday', 'Half Day'].includes(formData.taskType) && (
                                     <div className="form-group full-width" style={{ background: 'var(--bg-secondary)', padding: '1rem', borderRadius: 'var(--radius-sm)' }}>
                                         <label className="form-label" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                                             <span>Add Cameramen (Collaborators)</span>
