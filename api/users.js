@@ -1,6 +1,7 @@
 import bcrypt from 'bcryptjs';
 import { executeQuery } from './_utils/db.js';
 import { logAction } from './_utils/audit.js';
+import { requireAuth } from './_utils/auth_middleware.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -8,6 +9,14 @@ export default async function handler(req, res) {
     }
 
     const { action, ...data } = req.body;
+
+    // AUTH CHECK: Verify token and Admin Role
+    const user = requireAuth(req, res);
+    if (!user) return;
+
+    if (user.role !== 'admin') {
+        return res.status(403).json({ success: false, error: 'Unauthorized: Admin access required' });
+    }
 
     try {
         if (action === 'get-all') {
@@ -18,7 +27,8 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true, trainers: result.rows });
 
         } else if (action === 'add') {
-            const { name, jsId, adminId } = data;
+            const { name, jsId } = data;
+            const adminId = user.userId;
             const defaultPassword = 'Welcome@JS2026';
             const passwordHash = await bcrypt.hash(defaultPassword, 10);
 
@@ -33,7 +43,8 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
 
         } else if (action === 'update') {
-            const { userId, name, jsId, adminId } = data;
+            const { userId, name, jsId } = data;
+            const adminId = user.userId;
 
             await executeQuery(
                 'UPDATE users SET name = ?, js_id = ? WHERE id = ?',
@@ -46,7 +57,8 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
 
         } else if (action === 'delete') {
-            const { userId, adminId } = data;
+            const { userId } = data;
+            const adminId = user.userId;
             // First delete all tasks for this user
             await executeQuery('DELETE FROM tasks WHERE user_id = ?', [userId]);
             // Then delete the user
@@ -58,7 +70,8 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
 
         } else if (action === 'reset-password') {
-            const { userId, adminId } = data;
+            const { userId } = data;
+            const adminId = user.userId;
             const defaultPassword = 'Welcome@JS2026';
             const passwordHash = await bcrypt.hash(defaultPassword, 10);
 

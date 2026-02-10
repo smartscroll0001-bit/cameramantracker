@@ -8,7 +8,12 @@ export default async function handler(req, res) {
         return res.status(405).json({ error: 'Method not allowed' });
     }
 
+    if (!req.body) {
+        return res.status(400).json({ error: 'Missing request body' });
+    }
+
     const { action, ...data } = req.body;
+    console.log(`Auth API action: ${action}`);
 
     try {
         if (action === 'login') {
@@ -32,12 +37,18 @@ export default async function handler(req, res) {
             const { password_hash, ...userWithoutPassword } = user;
 
             // Generate JWT Token
-            const JWT_SECRET = process.env.JWT_SECRET || 'fallback_dev_secret_key_12345';
-            const token = jwt.sign(
-                { userId: user.id, role: user.role, name: user.name },
-                JWT_SECRET,
-                { expiresIn: '7d' }
-            );
+            let token;
+            try {
+                const JWT_SECRET = process.env.JWT_SECRET || 'fallback_dev_secret_key_12345';
+                token = jwt.sign(
+                    { userId: user.id, role: user.role, name: user.name },
+                    JWT_SECRET,
+                    { expiresIn: '7d' }
+                );
+            } catch (jwtError) {
+                console.error('JWT Signing Error:', jwtError);
+                return res.status(500).json({ success: false, error: 'Token generation failed' });
+            }
 
             // Return user AND token
             return res.status(200).json({

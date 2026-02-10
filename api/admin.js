@@ -1,4 +1,5 @@
 import { executeQuery } from './_utils/db.js';
+import { requireAuth } from './_utils/auth_middleware.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -6,6 +7,15 @@ export default async function handler(req, res) {
     }
 
     const { action, ...data } = req.body;
+
+    // AUTH CHECK: Verify token and Admin Role
+    const user = requireAuth(req, res);
+    if (!user) return;
+
+    // Most admin actions require admin role
+    if (user.role !== 'admin' && action !== 'get-user-queries') {
+        return res.status(403).json({ success: false, error: 'Unauthorized: Admin access required' });
+    }
 
     try {
         if (action === 'team-performance') {
@@ -146,7 +156,8 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true, logs: result.rows });
 
         } else if (action === 'send-query') {
-            const { userId, query, adminId } = data;
+            const { userId, query } = data;
+            const adminId = user.userId;
             await executeQuery(
                 'INSERT INTO user_queries (user_id, admin_id, query_text) VALUES (?, ?, ?)',
                 [userId, adminId, query]
