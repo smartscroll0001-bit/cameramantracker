@@ -119,14 +119,14 @@ export function Announcements() {
                                         style={{ flex: 1 }}
                                     >
                                         <Users size={16} />
-                                        All Trainers
+                                        All Cameramen
                                     </button>
                                     <div style={{ position: 'relative', flex: 1 }}>
                                         <Search size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
                                         <input
                                             type="text"
                                             className="form-input"
-                                            placeholder="Search trainer..."
+                                            placeholder="Search cameraman..."
                                             value={searchTerm}
                                             onChange={(e) => setSearchTerm(e.target.value)}
                                             style={{ paddingLeft: '32px' }}
@@ -160,7 +160,7 @@ export function Announcements() {
                                         );
                                     })}
                                     {filteredTrainers.length === 0 && (
-                                        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', padding: '0.5rem' }}>No trainers found</p>
+                                        <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem', padding: '0.5rem' }}>No cameramen found</p>
                                     )}
                                 </div>
                             </div>
@@ -222,7 +222,7 @@ export function Announcements() {
                                         </div>
                                         <div style={{ fontSize: '0.9rem', marginBottom: '0.5rem' }}>{item.message}</div>
                                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                            To: {item.is_global ? 'Everyone' : 'Specific Trainers'}
+                                            To: {item.is_global ? 'Everyone' : 'Specific Cameramen'}
                                         </div>
                                     </div>
                                 ))

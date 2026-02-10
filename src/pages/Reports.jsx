@@ -119,14 +119,14 @@ export function Reports() {
             <main className="main-content">
                 <div className="page-header">
                     <h1 className="page-title">Individual Reports</h1>
-                    <p className="page-subtitle">View detailed trainer performance</p>
+                    <p className="page-subtitle">View detailed cameraman performance</p>
                 </div>
 
                 {/* Filters */}
                 <div className="card filter-section">
                     <div className="filters-grid">
                         <div className="filter-group">
-                            <label className="filter-label">Select Trainer</label>
+                            <label className="filter-label">Select Cameraman</label>
                             <select
                                 className="filter-select"
                                 value={selectedTrainer}

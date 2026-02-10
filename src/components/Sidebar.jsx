@@ -51,7 +51,7 @@ export function Sidebar() {
                     <div className="user-info">
                         <div className="user-section-title">MY DESK</div>
                         <div className="user-name">{user?.name}</div>
-                        {!isAdmin && <div className="user-role">Trainer</div>}
+                        {!isAdmin && <div className="user-role">Cameraman</div>}
                     </div>
 
                     {/* Navigation */}

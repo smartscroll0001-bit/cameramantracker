@@ -239,9 +239,9 @@ export function UserManagement() {
                 )}
 
                 <div className="card">
-                    <h2 className="card-title">All Trainers</h2>
+                    <h2 className="card-title">All Cameramen</h2>
                     {loading ? (
-                        <div className="loading-state">Loading trainers...</div>
+                        <div className="loading-state">Loading cameramen...</div>
                     ) : (
                         <div className="table-container">
                             <table className="table">

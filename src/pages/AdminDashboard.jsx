@@ -168,7 +168,7 @@ export function AdminDashboard() {
                                 </div>
                                 <div className="metric-content">
                                     <div className="metric-value">{totalTrainers}</div>
-                                    <div className="metric-label">Total Trainers</div>
+                                    <div className="metric-label">Total Cameramen</div>
                                 </div>
                             </div>
 

@@ -3,7 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { Login } from './pages/Login';
-import { TrainerDashboard } from './pages/TrainerDashboard';
+import { CameramanDashboard } from './pages/CameramanDashboard';
 import { TaskHistory } from './pages/TaskHistory';
 import { AdminDashboard } from './pages/AdminDashboard';
 import { UserManagement } from './pages/UserManagement';
@@ -35,7 +35,7 @@ function App() {
             path="/dashboard"
             element={
               <ProtectedRoute>
-                <TrainerDashboard />
+                <CameramanDashboard />
               </ProtectedRoute>
             }
           />

@@ -40,7 +40,7 @@ export function TrendsChart({ data }) {
                     >
                         <div
                             className="trend-bar"
-                            title={`${day.date}: ${day.total_hours.toFixed(1)} hrs (${day.active_trainers} active)`}
+                            title={`${day.date}: ${day.total_hours.toFixed(1)} hrs (${day.active_trainers} active cameramen)`}
                             style={{
                                 width: '100%',
                                 height: `${height}%`,
