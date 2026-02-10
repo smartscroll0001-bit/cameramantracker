@@ -122,7 +122,8 @@ export function CameramanDashboard() {
                 created_at: q.created_at || new Date().toISOString(),
                 isTaskQuery: true,
                 taskDate: q.date,
-                taskType: q.task_type
+                taskType: q.task_type,
+                taskRemarks: q.remarks // Add remarks
             }));
             allQueries = [...allQueries, ...taskQueries];
         }

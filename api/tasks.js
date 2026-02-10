@@ -179,7 +179,7 @@ export default async function handler(req, res) {
             const userId = user.userId;
 
             const result = await executeQuery(
-                "SELECT id, task_type, custom_task_name, date, admin_query, created_at FROM tasks WHERE user_id = ? AND admin_query IS NOT NULL AND query_status = 'pending' ORDER BY created_at DESC",
+                "SELECT id, task_type, custom_task_name, date, admin_query, query_status, remarks, created_at FROM tasks WHERE user_id = ? AND admin_query IS NOT NULL AND query_status = 'pending' ORDER BY created_at DESC",
                 [userId]
             );
             return res.status(200).json({ success: true, queries: result.rows });
