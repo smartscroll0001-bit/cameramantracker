@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Sidebar } from '../components/Sidebar';
 import { KPIBadge } from '../components/KPIBadge';
 import { useAuth } from '../context/AuthContext';
-import { getTeamPerformance, getExportData } from '../lib/api';
+import { getTeamPerformance, getExportData, sendAdminQuery } from '../lib/api';
 import { exportData } from '../lib/exportUtils.js';
 
 import { Users, TrendingUp, Clock, Download, X, Calendar, FileSpreadsheet, FileText, RefreshCw, MessageSquare, Send } from 'lucide-react';
@@ -61,6 +61,35 @@ export function AdminDashboard() {
         }
 
         setLoading(false);
+    };
+
+    // Query Modal State
+    const [showQueryModal, setShowQueryModal] = useState(false);
+    const [selectedTrainer, setSelectedTrainer] = useState(null);
+    const [queryText, setQueryText] = useState('');
+    const [sendingQuery, setSendingQuery] = useState(false);
+
+    const openQueryModal = (trainer) => {
+        setSelectedTrainer(trainer);
+        setQueryText('');
+        setShowQueryModal(true);
+    };
+
+    const handleSendQuery = async (e) => {
+        e.preventDefault();
+        if (!selectedTrainer) return;
+
+        setSendingQuery(true);
+        const result = await sendAdminQuery(selectedTrainer.owner_id || selectedTrainer.id, queryText, user.id);
+
+        if (result.success) {
+            alert('Message sent successfully');
+            setShowQueryModal(false);
+            setQueryText('');
+        } else {
+            alert('Failed to send message: ' + (result.error || 'Unknown error'));
+        }
+        setSendingQuery(false);
     };
 
     useEffect(() => {
