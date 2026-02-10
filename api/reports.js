@@ -24,22 +24,25 @@ export default async function handler(req, res) {
             const today = new Date();
             let query = `
                 SELECT 
-                    task_type,
-                    custom_task_name,
-                    hours,
-                    date,
-                    remarks,
-                    admin_query,
-                    query_status,
-                    trainer_response,
-                    created_at
-                FROM tasks 
-                WHERE user_id = ?
+                    t.id,
+                    t.task_type,
+                    t.custom_task_name,
+                    t.date,
+                    t.remarks,
+                    t.admin_query,
+                    t.query_status,
+                    t.trainer_response,
+                    t.created_at,
+                    tc.hours,
+                    tc.collaborator_type
+                FROM tasks t
+                JOIN task_collaborators tc ON t.id = tc.task_id
+                WHERE tc.user_id = ?
             `;
             const params = [trainerId];
 
             if (dateRange === 'custom' && startDate && endDate) {
-                query += ' AND date >= ? AND date <= ?';
+                query += ' AND t.date >= ? AND t.date <= ?';
                 params.push(startDate, endDate);
             } else {
                 let dateThreshold;
@@ -57,11 +60,11 @@ export default async function handler(req, res) {
                 const localDate = new Date(dateThreshold.getTime() - (offset * 60 * 1000));
                 const dateThresholdStr = localDate.toISOString().split('T')[0];
 
-                query += ' AND date >= ?';
+                query += ' AND t.date >= ?';
                 params.push(dateThresholdStr);
             }
 
-            query += ' ORDER BY date DESC, created_at DESC';
+            query += ' ORDER BY t.date DESC, t.created_at DESC';
 
             const result = await executeQuery(query, params);
 

@@ -22,19 +22,30 @@ export default async function handler(req, res) {
             const { date } = data;
 
             // Optimized query to avoid N+1
+            // Optimized query to join task_collaborators to include both primary and secondary tasks
             const query = `
                 SELECT 
                     u.id, 
                     u.name, 
                     u.js_id,
-                    COALESCE(SUM(t.hours), 0) as total_hours,
-                    MAX(CASE WHEN t.task_type = 'Leave' THEN 1 ELSE 0 END) as is_leave,
-                    MAX(CASE WHEN t.task_type = 'Holiday' THEN 1 ELSE 0 END) as is_holiday,
-                    MAX(CASE WHEN t.task_type = 'Half Day' THEN 1 ELSE 0 END) as is_half_day
+                    COALESCE(stats.total_hours, 0) as total_hours,
+                    COALESCE(stats.is_leave, 0) as is_leave,
+                    COALESCE(stats.is_holiday, 0) as is_holiday,
+                    COALESCE(stats.is_half_day, 0) as is_half_day
                 FROM users u
-                LEFT JOIN tasks t ON u.id = t.user_id AND t.date = ?
+                LEFT JOIN (
+                    SELECT 
+                        tc.user_id,
+                        SUM(tc.hours) as total_hours,
+                        MAX(CASE WHEN t.task_type = 'Leave' THEN 1 ELSE 0 END) as is_leave,
+                        MAX(CASE WHEN t.task_type = 'Holiday' THEN 1 ELSE 0 END) as is_holiday,
+                        MAX(CASE WHEN t.task_type = 'Half Day' THEN 1 ELSE 0 END) as is_half_day
+                    FROM task_collaborators tc
+                    JOIN tasks t ON tc.task_id = t.id
+                    WHERE t.date = ?
+                    GROUP BY tc.user_id
+                ) stats ON u.id = stats.user_id
                 WHERE u.role = 'trainer'
-                GROUP BY u.id
                 ORDER BY u.name
             `;
 
