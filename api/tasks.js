@@ -1,5 +1,6 @@
 import { executeQuery, executeBatch } from './_utils/db.js';
 import { logAction } from './_utils/audit.js';
+import { requireAuth } from './_utils/auth_middleware.js';
 
 export default async function handler(req, res) {
     if (req.method !== 'POST') {
@@ -10,7 +11,12 @@ export default async function handler(req, res) {
 
     try {
         if (action === 'get-user-tasks') {
-            const { userId, date } = data;
+            // AUTH CHECK: Verify token and get userId
+            const user = requireAuth(req, res);
+            if (!user) return; // Response handled by middleware
+
+            const { date } = data;
+            const userId = user.userId; // Trust the token, not the body
 
             // Modified query to join task_collaborators
             // We want tasks where the user is a collaborator (primary or secondary)
@@ -38,7 +44,11 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true, tasks: result.rows });
 
         } else if (action === 'add') {
-            const { userId, taskType, customTaskName, hours, date, startTime, endTime, remarks, collaborators } = data;
+            const user = requireAuth(req, res);
+            if (!user) return;
+            const userId = user.userId;
+
+            const { taskType, customTaskName, hours, date, startTime, endTime, remarks, collaborators } = data;
 
             // 1. Insert into tasks (Main record)
             const insertTaskResult = await executeQuery(
@@ -82,7 +92,11 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
 
         } else if (action === 'update') {
-            const { taskId, userId, taskType, customTaskName, hours, date, startTime, endTime, remarks } = data;
+            const user = requireAuth(req, res);
+            if (!user) return;
+            const userId = user.userId;
+
+            const { taskId, taskType, customTaskName, hours, date, startTime, endTime, remarks } = data;
 
             // Verify ownership
             const checkResult = await executeQuery('SELECT user_id FROM tasks WHERE id = ?', [taskId]);
@@ -112,7 +126,11 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
 
         } else if (action === 'delete') {
-            const { taskId, userId } = data;
+            const user = requireAuth(req, res);
+            if (!user) return;
+            const userId = user.userId;
+
+            const { taskId } = data;
 
             // Verify ownership
             const checkResult = await executeQuery('SELECT user_id FROM tasks WHERE id = ?', [taskId]);
@@ -127,7 +145,11 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
 
         } else if (action === 'get-today-hours') {
-            const { userId, date } = data;
+            const user = requireAuth(req, res);
+            if (!user) return;
+            const userId = user.userId;
+
+            const { date } = data;
             // Updated to sum from task_collaborators
             const result = await executeQuery(
                 'SELECT SUM(hours) as total FROM task_collaborators WHERE user_id = ? AND task_id IN (SELECT id FROM tasks WHERE date = ?)',
@@ -137,6 +159,10 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true, hours: total });
 
         } else if (action === 'raise-query') {
+            // Ideally only admins or task owners? For now any auth user.
+            const user = requireAuth(req, res);
+            if (!user) return;
+
             const { taskId, query, adminId } = data;
 
             await executeQuery(
