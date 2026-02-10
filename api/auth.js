@@ -1,4 +1,5 @@
 import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
 import { executeQuery } from './_utils/db.js';
 import { logAction } from './_utils/audit.js';
 
@@ -29,7 +30,20 @@ export default async function handler(req, res) {
             }
 
             const { password_hash, ...userWithoutPassword } = user;
-            return res.status(200).json({ success: true, user: userWithoutPassword });
+
+            // Generate JWT Token
+            const JWT_SECRET = process.env.JWT_SECRET || 'fallback_dev_secret_key_12345';
+            const token = jwt.sign(
+                { userId: user.id, role: user.role, name: user.name },
+                JWT_SECRET,
+                { expiresIn: '7d' }
+            );
+
+            // Return user AND token
+            return res.status(200).json({
+                success: true,
+                user: { ...userWithoutPassword, token }
+            });
 
         } else if (action === 'change-password') {
             const { userId, newPassword } = data;

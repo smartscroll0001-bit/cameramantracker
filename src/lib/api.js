@@ -3,9 +3,17 @@
 // Wrapper for API calls
 async function apiCall(endpoint, body) {
     try {
+        const savedUser = localStorage.getItem('teamtracker_user');
+        const token = savedUser ? JSON.parse(savedUser).token : null;
+
+        const headers = { 'Content-Type': 'application/json' };
+        if (token) {
+            headers['Authorization'] = `Bearer ${token}`;
+        }
+
         const response = await fetch(`/api/${endpoint}`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers,
             body: JSON.stringify(body),
         });
 
