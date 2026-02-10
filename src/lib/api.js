@@ -119,6 +119,10 @@ export async function raiseQuery(taskId, query, adminId) {
     return apiCall('tasks', { action: 'raise-query', taskId, query, adminId });
 }
 
+export async function getPendingQueries(userId) {
+    return apiCall('tasks', { action: 'get-pending-queries', userId });
+}
+
 // Admin dashboard functions
 export async function getTeamPerformance(date) {
     return apiCall('admin', { action: 'team-performance', date });

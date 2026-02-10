@@ -172,6 +172,18 @@ export default async function handler(req, res) {
 
             return res.status(200).json({ success: true });
 
+        } else if (action === 'get-pending-queries') {
+            // Fetch tasks where admin has raised a query
+            const user = requireAuth(req, res);
+            if (!user) return;
+            const userId = user.userId;
+
+            const result = await executeQuery(
+                "SELECT id, task_type, custom_task_name, date, admin_query, created_at FROM tasks WHERE user_id = ? AND admin_query IS NOT NULL AND query_status = 'pending' ORDER BY created_at DESC",
+                [userId]
+            );
+            return res.status(200).json({ success: true, queries: result.rows });
+
         } else {
             return res.status(400).json({ error: 'Invalid action' });
         }

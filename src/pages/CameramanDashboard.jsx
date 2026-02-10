@@ -4,7 +4,7 @@ import { KPIBadge } from '../components/KPIBadge';
 import { ChangePassword } from '../components/ChangePassword';
 import { useAuth } from '../context/AuthContext';
 import { AnnouncementBanner } from '../components/AnnouncementBanner';
-import { getUserTasks, addTask, updateTask, deleteTask, getTodayHours, getTaskTypes, getAllTrainers, getUserQueries } from '../lib/api';
+import { getUserTasks, addTask, updateTask, deleteTask, getTodayHours, getTaskTypes, getAllTrainers, getUserQueries, getPendingQueries } from '../lib/api';
 import { Plus, Clock, Edit2, Trash2, Users, MessageSquare, X } from 'lucide-react';
 import './CameramanDashboard.css';
 
@@ -85,7 +85,8 @@ export function CameramanDashboard() {
             getTodayHours(user.id, todayStr),
             getTaskTypes(),
             getAllTrainers(),
-            getUserQueries(user.id)
+            getUserQueries(user.id),
+            getPendingQueries(user.id)
         ]);
 
         if (typesResult.success && typesResult.types.length > 0) {
@@ -108,9 +109,28 @@ export function CameramanDashboard() {
             // API returns 'trainers' array
             setAllUsers((usersResult.trainers || []).filter(u => u.id !== user.id)); // Exclude self
         }
+        const pendingQueriesResult = results[5]; // The new result from getPendingQueries
+
+        let allQueries = [];
         if (queriesResult.success) {
-            setAdminQueries(queriesResult.queries);
+            allQueries = [...allQueries, ...queriesResult.queries];
         }
+        if (pendingQueriesResult && pendingQueriesResult.success) {
+            // Map task queries to a similar structure or enhance them
+            const taskQueries = pendingQueriesResult.queries.map(q => ({
+                id: `task-${q.id}`,
+                query_text: q.admin_query,
+                created_at: q.created_at || new Date().toISOString(),
+                isTaskQuery: true,
+                taskDate: q.date,
+                taskType: q.task_type
+            }));
+            allQueries = [...allQueries, ...taskQueries];
+        }
+
+        // Sort by date desc
+        allQueries.sort((a, b) => new Date(b.created_at) - new Date(a.created_at));
+        setAdminQueries(allQueries);
         setLoading(false);
     };
 
@@ -284,9 +304,17 @@ export function CameramanDashboard() {
                             Messages from Admin
                         </h3>
                         {adminQueries.map(q => (
-                            <div key={q.id} style={{ padding: '0.5rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', marginBottom: '0.5rem' }}>
-                                <p style={{ margin: 0 }}>{q.query_text}</p>
-                                <small className="text-muted">{new Date(q.created_at).toLocaleString()}</small>
+                            <div key={q.id} style={{ padding: '0.8rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', marginBottom: '0.5rem', borderLeft: q.isTaskQuery ? '3px solid var(--accent-yellow)' : 'none' }}>
+                                {q.isTaskQuery && (
+                                    <div style={{ marginBottom: '0.25rem', fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between' }}>
+                                        <span>
+                                            Regarding: {q.taskType}
+                                            <span className="text-muted" style={{ fontWeight: 'normal' }}> on {new Date(q.taskDate).toLocaleDateString()}</span>
+                                        </span>
+                                    </div>
+                                )}
+                                <p style={{ margin: 0, fontSize: '0.95rem' }}>{q.query_text}</p>
+                                <small className="text-muted" style={{ display: 'block', marginTop: '0.25rem' }}>{new Date(q.created_at).toLocaleString()}</small>
                             </div>
                         ))}
                     </div>
