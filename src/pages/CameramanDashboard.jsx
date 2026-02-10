@@ -105,7 +105,8 @@ export function CameramanDashboard() {
             setTodayHours(hoursResult.hours);
         }
         if (usersResult.success) {
-            setAllUsers(usersResult.users.filter(u => u.id !== user.id)); // Exclude self
+            // API returns 'trainers' array
+            setAllUsers((usersResult.trainers || []).filter(u => u.id !== user.id)); // Exclude self
         }
         if (queriesResult.success) {
             setAdminQueries(queriesResult.queries);
