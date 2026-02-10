@@ -48,13 +48,13 @@ export function UserManagement() {
         const result = await addTrainer(formData.name.trim(), formData.jsId.trim(), user.id);
 
         if (result.success) {
-            setSuccess(`Trainer ${formData.name} added successfully!`);
+            setSuccess(`Cameraman ${formData.name} added successfully!`);
             setFormData({ name: '', jsId: '' });
             setShowAddForm(false);
             loadTrainers();
             setTimeout(() => setSuccess(''), 3000);
         } else {
-            setError(result.error || 'Failed to add trainer');
+            setError(result.error || 'Failed to add cameraman');
         }
     };
 
@@ -75,18 +75,18 @@ export function UserManagement() {
     };
 
     const handleDeleteTrainer = async (trainerId, trainerName) => {
-        if (!confirm(`Are you sure you want to delete trainer "${trainerName}"? This action cannot be undone.`)) {
+        if (!confirm(`Are you sure you want to delete cameraman "${trainerName}"? This action cannot be undone.`)) {
             return;
         }
 
         const result = await deleteUser(trainerId, user.id);
 
         if (result.success) {
-            setSuccess(`Trainer ${trainerName} deleted successfully`);
+            setSuccess(`Cameraman ${trainerName} deleted successfully`);
             loadTrainers();
             setTimeout(() => setSuccess(''), 3000);
         } else {
-            setError(result.error || 'Failed to delete trainer');
+            setError(result.error || 'Failed to delete cameraman');
             setTimeout(() => setError(''), 3000);
         }
     };
@@ -108,13 +108,13 @@ export function UserManagement() {
         const result = await updateUser(editingTrainer.id, editFormData.name.trim(), editFormData.jsId.trim(), user.id);
 
         if (result.success) {
-            setSuccess(`Trainer ${editFormData.name} updated successfully!`);
+            setSuccess(`Cameraman ${editFormData.name} updated successfully!`);
             setEditModalOpen(false);
             setEditingTrainer(null);
             loadTrainers();
             setTimeout(() => setSuccess(''), 3000);
         } else {
-            setError(result.error || 'Failed to update trainer');
+            setError(result.error || 'Failed to update cameraman');
         }
     };
 
@@ -126,11 +126,11 @@ export function UserManagement() {
                 <div className="page-header">
                     <div>
                         <h1 className="page-title">User Management</h1>
-                        <p className="page-subtitle">Manage trainers and reset passwords</p>
+                        <p className="page-subtitle">Manage cameramen and reset passwords</p>
                     </div>
                     <button className="btn btn-primary" onClick={() => setShowAddForm(!showAddForm)}>
                         <UserPlus size={20} />
-                        Add Trainer
+                        Add Cameraman
                     </button>
                 </div>
 
@@ -150,7 +150,7 @@ export function UserManagement() {
 
                 {showAddForm && (
                     <div className="card add-trainer-form fade-in">
-                        <h3 className="card-title">Add New Trainer</h3>
+                        <h3 className="card-title">Add New Cameraman</h3>
                         <form onSubmit={handleAddTrainer}>
                             <div className="form-row-inline">
                                 <div className="form-group">
@@ -179,7 +179,7 @@ export function UserManagement() {
 
                                 <div className="form-group form-actions-inline">
                                     <button type="submit" className="btn btn-primary">
-                                        Add Trainer
+                                        Add Cameraman
                                     </button>
                                     <button
                                         type="button"
@@ -198,7 +198,7 @@ export function UserManagement() {
                 {editModalOpen && (
                     <div className="modal-overlay">
                         <div className="card add-trainer-form fade-in" style={{ maxWidth: '500px', margin: '2rem auto' }}>
-                            <h3 className="card-title">Edit Trainer Details</h3>
+                            <h3 className="card-title">Edit Cameraman Details</h3>
                             <form onSubmit={handleUpdateTrainer}>
                                 <div className="form-group">
                                     <label className="form-label">Full Name</label>
@@ -282,7 +282,7 @@ export function UserManagement() {
                                                 <button
                                                     className="btn btn-icon-only btn-sm"
                                                     onClick={() => handleDeleteTrainer(trainer.id, trainer.name)}
-                                                    title="Delete Trainer"
+                                                    title="Delete Cameraman"
                                                     style={{ marginLeft: '0.5rem', color: 'var(--status-red)', border: '1px solid var(--border-color)', background: 'transparent' }}
                                                 >
                                                     <Trash2 size={16} />
