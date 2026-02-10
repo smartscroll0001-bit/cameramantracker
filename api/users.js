@@ -14,9 +14,10 @@ export default async function handler(req, res) {
     const user = requireAuth(req, res);
     if (!user) return;
 
-    if (user.role !== 'admin') {
-        return res.status(403).json({ success: false, error: 'Unauthorized: Admin access required' });
-    }
+    // Global admin check removed. Role checks moved to specific actions.
+    // if (user.role !== 'admin') {
+    //    return res.status(403).json({ success: false, error: 'Unauthorized: Admin access required' });
+    // }
 
     try {
         if (action === 'get-all') {
@@ -27,6 +28,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true, trainers: result.rows });
 
         } else if (action === 'add') {
+            if (user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
             const { name, jsId } = data;
             const adminId = user.userId;
             const defaultPassword = 'Welcome@JS2026';
@@ -43,6 +45,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
 
         } else if (action === 'update') {
+            if (user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
             const { userId, name, jsId } = data;
             const adminId = user.userId;
 
@@ -57,6 +60,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
 
         } else if (action === 'delete') {
+            if (user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
             const { userId } = data;
             const adminId = user.userId;
             // First delete all tasks for this user
@@ -70,6 +74,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ success: true });
 
         } else if (action === 'reset-password') {
+            if (user.role !== 'admin') return res.status(403).json({ error: 'Unauthorized' });
             const { userId } = data;
             const adminId = user.userId;
             const defaultPassword = 'Welcome@JS2026';
