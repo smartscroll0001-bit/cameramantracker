@@ -4,7 +4,7 @@ import { KPIBadge } from '../components/KPIBadge';
 import { ChangePassword } from '../components/ChangePassword';
 import { useAuth } from '../context/AuthContext';
 import { AnnouncementBanner } from '../components/AnnouncementBanner';
-import { getUserTasks, addTask, updateTask, deleteTask, getTodayHours, getTaskTypes, getAllTrainers, getUserQueries, getPendingQueries } from '../lib/api';
+import { getUserTasks, addTask, updateTask, deleteTask, getTodayHours, getTaskTypes, getAllTrainers, getUserQueries, getPendingQueries, dismissUserQuery, resolveTaskQuery } from '../lib/api';
 import { Plus, Clock, Edit2, Trash2, Users, MessageSquare, X } from 'lucide-react';
 import './CameramanDashboard.css';
 
@@ -112,7 +112,9 @@ export function CameramanDashboard() {
 
         let allQueries = [];
         if (queriesResult.success) {
-            allQueries = [...allQueries, ...queriesResult.queries];
+            // Only show unresolved queries
+            const unresolved = queriesResult.queries.filter(q => !q.is_resolved);
+            allQueries = [...allQueries, ...unresolved];
         }
         if (pendingQueriesResult && pendingQueriesResult.success) {
             // Map task queries to a similar structure or enhance them
@@ -263,6 +265,26 @@ export function CameramanDashboard() {
         }
     };
 
+    const handleDismiss = async (id, isTaskQuery) => {
+        if (!confirm('Dismiss this message?')) return;
+
+        let result;
+        if (isTaskQuery) {
+            // ID format is "task-[id]"
+            const taskId = id.replace('task-', '');
+            result = await resolveTaskQuery(taskId);
+        } else {
+            result = await dismissUserQuery(id);
+        }
+
+        if (result.success) {
+            // Remove from UI immediately
+            setAdminQueries(prev => prev.filter(q => q.id !== id));
+        } else {
+            alert('Failed to dismiss message');
+        }
+    };
+
     const handleCancelEdit = () => {
         setEditingTask(null);
         setShowTaskForm(false);
@@ -304,17 +326,41 @@ export function CameramanDashboard() {
                             Messages from Admin
                         </h3>
                         {adminQueries.map(q => (
-                            <div key={q.id} style={{ padding: '0.8rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', marginBottom: '0.5rem', borderLeft: q.isTaskQuery ? '3px solid var(--accent-yellow)' : 'none' }}>
+                            <div key={q.id} style={{ position: 'relative', padding: '0.8rem', background: 'var(--bg-secondary)', borderRadius: 'var(--radius-sm)', marginBottom: '0.5rem', borderLeft: q.isTaskQuery ? '3px solid var(--accent-yellow)' : 'none' }}>
+                                <button
+                                    className="btn-icon"
+                                    onClick={() => handleDismiss(q.id, q.isTaskQuery)}
+                                    title="Dismiss message"
+                                    style={{ position: 'absolute', top: '5px', right: '5px', opacity: 0.6 }}
+                                >
+                                    <X size={16} />
+                                </button>
                                 {q.isTaskQuery && (
-                                    <div style={{ marginBottom: '0.25rem', fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--text-primary)', display: 'flex', justifyContent: 'space-between' }}>
-                                        <span>
-                                            Regarding: {q.taskType}
-                                            <span className="text-muted" style={{ fontWeight: 'normal' }}> on {new Date(q.taskDate).toLocaleDateString()}</span>
-                                        </span>
+                                    <div style={{ marginBottom: '0.25rem', fontSize: '0.85rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'space-between', paddingRight: '20px' }}>
+                                            <span>
+                                                Regarding: {q.taskType}
+                                                <span className="text-muted" style={{ fontWeight: 'normal' }}> on {new Date(q.taskDate).toLocaleDateString()}</span>
+                                            </span>
+                                        </div>
+                                        {q.taskRemarks && (
+                                            <div style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', fontWeight: 'normal', marginTop: '2px' }}>
+                                                Your Remarks: "{q.taskRemarks}"
+                                            </div>
+                                        )}
                                     </div>
                                 )}
-                                <p style={{ margin: 0, fontSize: '0.95rem' }}>{q.query_text}</p>
-                                <small className="text-muted" style={{ display: 'block', marginTop: '0.25rem' }}>{new Date(q.created_at).toLocaleString()}</small>
+                                <p style={{ margin: 0, fontSize: '0.95rem', paddingRight: '20px' }}>{q.query_text}</p>
+                                <small className="text-muted" style={{ display: 'block', marginTop: '0.25rem' }}>
+                                    {(() => {
+                                        // Fix for SQLite UTC timestamps which might lack 'Z'
+                                        let dateStr = q.created_at;
+                                        if (typeof dateStr === 'string' && !dateStr.endsWith('Z') && !dateStr.includes('+')) {
+                                            dateStr += 'Z';
+                                        }
+                                        return new Date(dateStr).toLocaleString();
+                                    })()}
+                                </small>
                             </div>
                         ))}
                     </div>

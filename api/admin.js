@@ -175,6 +175,16 @@ export default async function handler(req, res) {
             );
             return res.status(200).json({ success: true });
 
+        } else if (action === 'dismiss-user-query') {
+            // Allow user to dismiss a general query
+            const { queryId } = data;
+            // Ensure the query belongs to the user requesting dismissal
+            await executeQuery(
+                "UPDATE user_queries SET is_resolved = 1 WHERE id = ? AND user_id = ?",
+                [queryId, user.userId]
+            );
+            return res.status(200).json({ success: true });
+
         } else if (action === 'get-user-queries') {
             // New action for fetching queries for a specific user
             const { userId } = data;

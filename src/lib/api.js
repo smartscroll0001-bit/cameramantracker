@@ -148,6 +148,14 @@ export async function getUserQueries(userId) {
     return apiCall('admin', { action: 'get-user-queries', userId });
 }
 
+export async function dismissUserQuery(queryId) {
+    return apiCall('admin', { action: 'dismiss-user-query', queryId });
+}
+
+export async function resolveTaskQuery(taskId) {
+    return apiCall('tasks', { action: 'resolve-query', taskId });
+}
+
 // Individual trainer reports
 export async function getTrainerTasks(trainerId, dateRange = 'week', startDate = null, endDate = null) {
     return apiCall('reports', { action: 'trainer-tasks', trainerId, dateRange, startDate, endDate });

@@ -184,6 +184,17 @@ export default async function handler(req, res) {
             );
             return res.status(200).json({ success: true, queries: result.rows });
 
+        } else if (action === 'resolve-query') {
+            const user = requireAuth(req, res);
+            if (!user) return;
+            // Allow user to mark their own task query as resolved
+            const { taskId } = data;
+            await executeQuery(
+                "UPDATE tasks SET query_status = 'resolved' WHERE id = ? AND user_id = ?",
+                [taskId, user.userId]
+            );
+            return res.status(200).json({ success: true });
+
         } else {
             return res.status(400).json({ error: 'Invalid action' });
         }
