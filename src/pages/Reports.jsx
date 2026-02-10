@@ -69,7 +69,7 @@ export function Reports() {
 
         const dataToExport = tasks.map(t => ({
             'Date': new Date(t.date).toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' }),
-            'Trainer': selectedTrainerData.name,
+            'Cameraman': selectedTrainerData.name,
             'Task Type': t.task_type,
             'Remarks': t.remarks || '',
             'Hours': t.hours.toFixed(1),
@@ -309,7 +309,7 @@ export function Reports() {
                                     <textarea
                                         className="form-input"
                                         rows="4"
-                                        placeholder="Enter your question for the trainer..."
+                                        placeholder="Enter your question for the cameraman..."
                                         value={queryText}
                                         onChange={(e) => setQueryText(e.target.value)}
                                         required
