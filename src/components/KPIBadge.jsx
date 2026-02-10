@@ -42,13 +42,15 @@ export function KPIBadge({ hours, status: statusOverride }) {
             };
         }
 
-        if (hours < 7) {
+        const safeHours = hours || 0;
+
+        if (safeHours < 7) {
             return {
                 label: 'Underperforming',
                 className: 'badge-red',
                 icon: <TrendingDown size={18} />,
             };
-        } else if (hours <= 7.5) {
+        } else if (safeHours <= 7.5) {
             return {
                 label: 'Normal',
                 className: 'badge-amber',
