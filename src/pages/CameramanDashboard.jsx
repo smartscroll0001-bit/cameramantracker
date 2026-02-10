@@ -6,14 +6,14 @@ import { useAuth } from '../context/AuthContext';
 import { AnnouncementBanner } from '../components/AnnouncementBanner';
 import { getUserTasks, addTask, updateTask, deleteTask, getTodayHours, getTaskTypes, getAllTrainers, getUserQueries } from '../lib/api';
 import { Plus, Clock, Edit2, Trash2, Users, MessageSquare, X } from 'lucide-react';
-import './TrainerDashboard.css';
+import './CameramanDashboard.css';
 
 const FALLBACK_TASK_TYPES = [
     'Shift Briefing', 'Refresher Session', 'Call Audit', 'Call Taking',
     'Meeting - Other', 'Team Meeting', 'Half Day', 'Leave', 'Holiday', 'Others'
 ];
 
-export function TrainerDashboard() {
+export function CameramanDashboard() {
     const { user, loginUser } = useAuth();
     const [todayHours, setTodayHours] = useState(0);
     const [tasks, setTasks] = useState([]);
