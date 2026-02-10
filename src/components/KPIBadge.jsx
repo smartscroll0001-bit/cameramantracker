@@ -42,13 +42,16 @@ export function KPIBadge({ hours, status: statusOverride }) {
             };
         }
 
-        if (hours < 7) {
+        // Ensure hours is treated as a number, defaulting to 0 if undefined/null
+        const numericHours = Number(hours) || 0;
+
+        if (numericHours < 7) {
             return {
                 label: 'Underperforming',
                 className: 'badge-red',
                 icon: <TrendingDown size={18} />,
             };
-        } else if (hours <= 7.5) {
+        } else if (numericHours <= 7.5) {
             return {
                 label: 'Normal',
                 className: 'badge-amber',
